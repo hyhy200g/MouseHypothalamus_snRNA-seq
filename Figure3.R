@@ -85,3 +85,5 @@ DotPlot(Hypo_neuron, features = c("Lhx1", "Coro6", "Trh", "Tac1", "Foxp2",
                                   "Hcrt", "Pomc", "Agrp", "Npw", "Hdc",
                                   "Pmch", "Cartpt"), cols = c("lightgrey", "red"),
         dot.scale = 5, cluster.idents = F, group.by = "Celltype") + RotatedAxis()
+
+#figure3D
