@@ -40,10 +40,15 @@ ggplot(mito, aes(x= mito, fill = count)) +
   theme_classic() 
 
 # figureS2B
-DimPlot(Hypo_integrated, group.by = "orig.ident")
-DimPlot(Hypo_integrated, group.by = "batch")
-DimPlot(Hypo_integrated, group.by = "sex")
-DimPlot(Hypo_integrated, group.by = "group")
+sample.color <- c('m36m'="#D97176FF",'m39f'="#917C5DFF",'m44m'='#526E2DFF', 'm47f'='#82491EFF', 'm48f'='#4f8c9d', 'm50m'='#9698dc', 'm6f'='#24325FFF', 'm71m'='#f6bb86')
+batch.color <- c('batch1'="#D97176FF",'batch2'="#917C5DFF",'batch3'="#526E2DFF",'batch4'="#f6bb86") 
+sex.color <- c('female'="#f6bb86",'male'="#526E2DFF") 
+group.color <- c('male_LFD'="#E89242FF",'male_HFD'="#917C5DFF",'female_LFD'='#526E2DFF', 'female_HFD'='#82491EFF')
+
+DimPlot(Hypo_integrated, group.by = "orig.ident", cols = sample.color)
+DimPlot(Hypo_integrated, group.by = "batch", cols = batch.color)
+DimPlot(Hypo_integrated, group.by = "sex", cols = sex.color)
+DimPlot(Hypo_integrated, group.by = "group", cols = group.color)
 
 # figureS2C
 Hypo_sample <- data.frame(sample = Hypo_integrated@meta.data$orig.ident,
