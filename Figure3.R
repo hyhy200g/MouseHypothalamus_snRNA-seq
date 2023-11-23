@@ -7,6 +7,9 @@ library(sctransform)
 library(harmony)
 library(dplyr)
 library(plyr)
+library(viridis)
+library(readxl)
+library(stringr)
 
 ## load all the objects
 Hypo_integrated <- readRDS("~/Yi_Huang/objects/Hypo_integrated.rds")
@@ -87,3 +90,39 @@ DotPlot(Hypo_neuron, features = c("Lhx1", "Coro6", "Trh", "Tac1", "Foxp2",
         dot.scale = 5, cluster.idents = F, group.by = "Celltype") + RotatedAxis()
 
 #figure3D
+data <- read_excel(path = "~/Yi_Huang/marker_GO/organized_marker_GO.xlsx", sheet = "final_organization")
+data1 <- str_split_fixed(data$GeneRatio,"/",2) %>% data.frame()
+data1$X1 <- as.numeric(data1$X1)
+data1$X2 <- as.numeric(data1$X2)
+data1$GeneRatio <- data1$X1 /  data1$X2
+
+data$GeneRatio <- data1$GeneRatio 
+
+data$Clusters <- factor(data$Clusters, levels = c("Lhx1/Coro6","Lhx1","Coro6/Trh","Coro6","Tch/Tac1/Bdnf","Tac2-1","Tcf4/Nr4a2","Gal/Ghrh","Vip/Vipr2",
+                                                  "Avp/Rorb","Avp","Oxt","Sst","Nr5a1","POMC","AgRP","Pmch/Cartpt","Hdc"))
+
+data$GO_term <- factor(data$GO_term, levels = c("regulation of circadian rhythm",
+                                                "circadian rhythm",
+                                                "glucose homeostasis",
+                                                "response to glucose",
+                                                "regulation of insulin secretion",
+                                                "insulin secretion involved in cellular response to glucose stimulus",
+                                                "insulin metabolic process",
+                                                "insulin secretion",
+                                                "response to dietary excess",
+                                                "negative regulation of appetite",
+                                                "regulation of feeding behavior",
+                                                "regulation of appetite",
+                                                "feeding behavior"))
+                       
+                       
+
+ggplot(data = data, aes(x = Clusters, y = GO_term, 
+                        color = p.adjust, size = GeneRatio)) + 
+  geom_point()+
+  geom_point(shape = 21,colour = "black") +
+  theme_classic() + 
+  theme(axis.text.x=element_text(angle=45,hjust=1,face = "bold",size = 8),axis.text.y=element_text(face = "bold",size = 8)) +
+  ylab("") + 
+  xlab("") + 
+  scale_color_viridis(option = "E",direction = -1) 
