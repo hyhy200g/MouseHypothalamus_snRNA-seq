@@ -80,43 +80,32 @@ Hypo_integrated <- SetIdent(Hypo_integrated,
                                      value = Hypo_integrated@meta.data$new_id)
 
 DefaultAssay(Hypo_integrated) <- "SCT"
+Hypo_integrated <- PrepSCTFindMarkers(Hypo_integrated, verbose = T) #Minimum UMI unchanged. Skipping re-correction.
 
-#Hypo_integrated <- PrepSCTFindMarkers(Hypo_integrated, verbose = T)
-#Minimum UMI unchanged. Skipping re-correction.
-
-
-for (i in clusters){
-  DE_LFM_vs_HFM_GSEA <- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_male_HFD",sep = "")), ident.2  = as.character(paste(i,"_male_LFD",sep = "")),
+##create a function for DEG analysis between maternal dietary groups
+DEG <- function(celltype, ident1, ident2){
+  DE<- FindMarkers(Hypo_integrated, assay = "SCT", ident.1 = as.character(paste0(celltype,"_",ident1)), ident.2  = as.character(paste0(celltype,"_",ident2)),
                                    logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
-  DE_LFM_vs_HFM <- DE_LFM_vs_HFM_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
-  write.csv(DE_LFM_vs_HFM, file =paste0("./final_DEG_SCTV2/Major/",i,"_LFM_vs_HFM_DEG_SCT_MAST.csv"))
+  DE <- DE %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
+  write.csv(DE, file =paste0("./final_DEG_SCTV2/Major/",celltype,"_",ident2,"_vs_",ident1,"_DEG_SCT_MAST.csv"))
 }
 
-
+##run DEG analysis
 for (i in clusters){
-  DE_LFF_vs_HFF_GSEA<- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_female_HFD",sep = "")), ident.2  = as.character(paste(i,"_female_LFD",sep = "")),
-                                   logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
-  write.csv(DE_LFF_vs_HFF_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_HFF_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
-  DE_LFF_vs_HFF <- DE_LFF_vs_HFF_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
-  write.csv(DE_LFF_vs_HFF, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_HFF_DEG_SCT_MAST_20221009.csv",sep =""))
+  DEG(celltype = i, ident1 = "male_HFD", ident2 = "female_HFD")
 }
 
 for (i in clusters){
-  DE_HFF_vs_HFM_GSEA<- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_male_HFD",sep = "")), ident.2  = as.character(paste(i,"_female_HFD",sep = "")),
-                                   logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
-  write.csv(DE_HFF_vs_HFM_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_HFF_vs_HFM_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
-  DE_HFF_vs_HFM <- DE_HFF_vs_HFM_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
-  write.csv(DE_HFF_vs_HFM, file =paste("./final_DEG_SCTV2/Major/",i,"_HFF_vs_HFM_DEG_SCT_MAST_20221009.csv",sep =""))
+  DEG(celltype = i, ident1 = "female_HFD", ident2 = "female_LFD")
 }
 
 for (i in clusters){
-  DE_LFF_vs_LFM_GSEA<- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_male_LFD",sep = "")), ident.2  = as.character(paste(i,"_female_LFD",sep = "")),
-                                   logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
-  write.csv(DE_LFF_vs_LFM_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_LFM_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
-  DE_LFF_vs_LFM <- DE_LFF_vs_LFM_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
-  write.csv(DE_LFF_vs_LFM, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_LFM_DEG_SCT_MAST_20221009.csv",sep =""))
+  DEG(celltype = i, ident1 = "male_HFD", ident2 = "male_LFD")
 }
 
+for (i in clusters){
+  DEG(celltype = i, ident1 = "male_LFD", ident2 = "female_LFD")
+}
 
 ##create a function to select the top and bottom n genes
 major_DEG <- read.csv(file = "./final_DEG_SCTV2/Major_cluster_DEG_results_organization_20231123.csv", header = T)
