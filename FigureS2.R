@@ -72,6 +72,52 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
 # figureS2D---------------------------------
 
 # figureS2E---------------------------------
+##Calculate the DEGs between maternal dietary groups in major clusters
+mouse.combined.cca.clean <- readRDS(file = "mouse.combined.cca.clean_recalculate_sct.rds")
+mouse.combined.cca.clean$new_id <- paste(mouse.combined.cca.clean$Celltype,"_",mouse.combined.cca.clean$sex,"_",mouse.combined.cca.clean$diet,sep = "")
+clusters <- names(table(mouse.combined.cca.clean$Celltype))
+mouse.combined.cca.clean <- SetIdent(mouse.combined.cca.clean,
+                                     value = mouse.combined.cca.clean@meta.data$new_id)
+
+Idents(mouse.combined.cca.clean)
+DefaultAssay(mouse.combined.cca.clean) <- "SCT"
+
+#mouse.combined.cca.clean <- PrepSCTFindMarkers(mouse.combined.cca.clean, verbose = T)
+#Minimum UMI unchanged. Skipping re-correction.
+
+
+for (i in clusters){
+  DE_LFM_vs_HFM_GSEA <- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_male_HFD",sep = "")), ident.2  = as.character(paste(i,"_male_LFD",sep = "")),
+                                   logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
+  write.csv(DE_LFM_vs_HFM_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_LFM_vs_HFM_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
+  DE_LFM_vs_HFM <- DE_LFM_vs_HFM_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
+  write.csv(DE_LFM_vs_HFM, file =paste("./final_DEG_SCTV2/Major/",i,"_LFM_vs_HFM_DEG_SCT_MAST_20221009.csv",sep =""))
+}
+
+
+for (i in clusters){
+  DE_LFF_vs_HFF_GSEA<- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_female_HFD",sep = "")), ident.2  = as.character(paste(i,"_female_LFD",sep = "")),
+                                   logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
+  write.csv(DE_LFF_vs_HFF_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_HFF_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
+  DE_LFF_vs_HFF <- DE_LFF_vs_HFF_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
+  write.csv(DE_LFF_vs_HFF, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_HFF_DEG_SCT_MAST_20221009.csv",sep =""))
+}
+
+for (i in clusters){
+  DE_HFF_vs_HFM_GSEA<- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_male_HFD",sep = "")), ident.2  = as.character(paste(i,"_female_HFD",sep = "")),
+                                   logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
+  write.csv(DE_HFF_vs_HFM_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_HFF_vs_HFM_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
+  DE_HFF_vs_HFM <- DE_HFF_vs_HFM_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
+  write.csv(DE_HFF_vs_HFM, file =paste("./final_DEG_SCTV2/Major/",i,"_HFF_vs_HFM_DEG_SCT_MAST_20221009.csv",sep =""))
+}
+
+for (i in clusters){
+  DE_LFF_vs_LFM_GSEA<- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_male_LFD",sep = "")), ident.2  = as.character(paste(i,"_female_LFD",sep = "")),
+                                   logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
+  write.csv(DE_LFF_vs_LFM_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_LFM_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
+  DE_LFF_vs_LFM <- DE_LFF_vs_LFM_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
+  write.csv(DE_LFF_vs_LFM, file =paste("./final_DEG_SCTV2/Major/",i,"_LFF_vs_LFM_DEG_SCT_MAST_20221009.csv",sep =""))
+}
 
 
 ##create a function to select the top and bottom n genes
@@ -79,8 +125,6 @@ major_DEG <- read.csv(file = "./final_DEG_SCTV2/Major_cluster_DEG_results_organi
 major_DEG$celltype <-substr(major_DEG$Comparisons, 1, nchar(major_DEG$Comparisons) - 11)
 major_DEG$Comparisons <- as.character(major_DEG$Comparisons)
 major_DEG$groups <- substr(major_DEG$Comparisons, nchar(major_DEG$Comparisons) - 9, nchar(major_DEG$Comparisons))
-
-major_DEG$groups <- sub("Macrophage_", "", major_DEG$groups)
 
 select_top_bottom_genes <- function(df, n = 10) {
   # List to store results
