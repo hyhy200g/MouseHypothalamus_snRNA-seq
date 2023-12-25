@@ -19,7 +19,7 @@ POMC <- readRDS("~/Yi_Huang/objects/POMC_subclusters.rds")
 Tanycyte <- readRDS("~/Yi_Huang/objects/Tanycyte_subclusters.rds")
 
 ## FigureS2
-# figureS2A
+# figureS2A---------------------------------
 UMIs <- data.frame(UMIs = Hypo_integrated@meta.data$nCount_RNA)
 mean(UMIs$UMIs)
 ggplot(UMIs, aes(UMIs)) +
@@ -39,7 +39,7 @@ ggplot(mito, aes(x= mito, fill = count)) +
   geom_vline(xintercept = mean(mito$mito), linetype = "dashed", color = "red") +
   theme_classic() 
 
-# figureS2B
+# figureS2B---------------------------------
 sample.color <- c('m36m'="#D97176FF",'m39f'="#917C5DFF",'m44m'='#526E2DFF', 'm47f'='#82491EFF', 'm48f'='#4f8c9d', 'm50m'='#9698dc', 'm6f'='#24325FFF', 'm71m'='#f6bb86')
 batch.color <- c('batch1'="#D97176FF",'batch2'="#917C5DFF",'batch3'="#526E2DFF",'batch4'="#f6bb86") 
 sex.color <- c('female'="#f6bb86",'male'="#526E2DFF") 
@@ -50,7 +50,7 @@ DimPlot(Hypo_integrated, group.by = "batch", cols = batch.color)
 DimPlot(Hypo_integrated, group.by = "sex", cols = sex.color)
 DimPlot(Hypo_integrated, group.by = "group", cols = group.color)
 
-# figureS2C
+# figureS2C---------------------------------
 Hypo_sample <- data.frame(sample = Hypo_integrated@meta.data$orig.ident,
                           cluster = Hypo_integrated@meta.data$Celltype)
 Hypo_sample$sample <- factor(Hypo_sample$sample, levels = c("m48f", "m6f", "m39f", "m47f",
@@ -69,9 +69,9 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
                                'Stromal cells'="#9698dc",
                                'Tanycytes'= "#4f8c9d"))
 
-# figureS2D
+# figureS2D---------------------------------
 
-# figureS2E
+# figureS2E---------------------------------
 ##create a function to select the top and bottom n genes
 select_top_bottom_genes <- function(df, n = 10) {
   # List to store results
@@ -158,7 +158,7 @@ dotplot_neuron <- dot_plot_DEG(celltype = "Neuron")
 dotplot_oligo <- dot_plot_DEG(celltype = "Oligodendrocytes")
 
 
-# figureS2F
+# figureS2F---------------------------------
 #### import packages ####
 library(symphony)
 library(harmony)
