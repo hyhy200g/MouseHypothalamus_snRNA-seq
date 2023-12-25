@@ -72,8 +72,7 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
 # figureS2D---------------------------------
 
 # figureS2E---------------------------------
-
-##Calculate the DEGs between maternal dietary groups in major clusters
+#Calculate the DEGs between maternal dietary groups in major cell populations
 Hypo_integrated$new_id <- paste0(Hypo_integratedCelltype,"_",Hypo_integrated$sex,"_",Hypo_integrated$diet)
 clusters <- names(table(Hypo_integrated$Celltype))
 Hypo_integrated <- SetIdent(Hypo_integrated,
@@ -82,7 +81,7 @@ Hypo_integrated <- SetIdent(Hypo_integrated,
 DefaultAssay(Hypo_integrated) <- "SCT"
 Hypo_integrated <- PrepSCTFindMarkers(Hypo_integrated, verbose = T) #Minimum UMI unchanged. Skipping re-correction.
 
-##create a function for DEG analysis between maternal dietary groups
+##create a function for DEG analysis
 DEG <- function(celltype, ident1, ident2){
   DE<- FindMarkers(Hypo_integrated, assay = "SCT", ident.1 = as.character(paste0(celltype,"_",ident1)), ident.2  = as.character(paste0(celltype,"_",ident2)),
                                    logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
