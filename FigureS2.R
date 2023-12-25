@@ -72,26 +72,24 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
 # figureS2D---------------------------------
 
 # figureS2E---------------------------------
+
 ##Calculate the DEGs between maternal dietary groups in major clusters
-mouse.combined.cca.clean <- readRDS(file = "mouse.combined.cca.clean_recalculate_sct.rds")
-mouse.combined.cca.clean$new_id <- paste(mouse.combined.cca.clean$Celltype,"_",mouse.combined.cca.clean$sex,"_",mouse.combined.cca.clean$diet,sep = "")
-clusters <- names(table(mouse.combined.cca.clean$Celltype))
-mouse.combined.cca.clean <- SetIdent(mouse.combined.cca.clean,
-                                     value = mouse.combined.cca.clean@meta.data$new_id)
+Hypo_integrated$new_id <- paste0(Hypo_integratedCelltype,"_",Hypo_integrated$sex,"_",Hypo_integrated$diet)
+clusters <- names(table(Hypo_integrated$Celltype))
+Hypo_integrated <- SetIdent(Hypo_integrated,
+                                     value = Hypo_integrated@meta.data$new_id)
 
-Idents(mouse.combined.cca.clean)
-DefaultAssay(mouse.combined.cca.clean) <- "SCT"
+DefaultAssay(Hypo_integrated) <- "SCT"
 
-#mouse.combined.cca.clean <- PrepSCTFindMarkers(mouse.combined.cca.clean, verbose = T)
+#Hypo_integrated <- PrepSCTFindMarkers(Hypo_integrated, verbose = T)
 #Minimum UMI unchanged. Skipping re-correction.
 
 
 for (i in clusters){
   DE_LFM_vs_HFM_GSEA <- FindMarkers(mouse.combined.cca.clean, assay = "SCT", ident.1 = as.character(paste(i,"_male_HFD",sep = "")), ident.2  = as.character(paste(i,"_male_LFD",sep = "")),
                                    logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
-  write.csv(DE_LFM_vs_HFM_GSEA, file =paste("./final_DEG_SCTV2/Major/",i,"_LFM_vs_HFM_DEG_GSEA_SCT_MAST_20221009.csv",sep =""))
   DE_LFM_vs_HFM <- DE_LFM_vs_HFM_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
-  write.csv(DE_LFM_vs_HFM, file =paste("./final_DEG_SCTV2/Major/",i,"_LFM_vs_HFM_DEG_SCT_MAST_20221009.csv",sep =""))
+  write.csv(DE_LFM_vs_HFM, file =paste0("./final_DEG_SCTV2/Major/",i,"_LFM_vs_HFM_DEG_SCT_MAST.csv"))
 }
 
 
