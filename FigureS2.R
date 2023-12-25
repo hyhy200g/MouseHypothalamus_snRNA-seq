@@ -72,7 +72,16 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
 # figureS2D---------------------------------
 
 # figureS2E---------------------------------
+
+
 ##create a function to select the top and bottom n genes
+major_DEG <- read.csv(file = "./final_DEG_SCTV2/Major_cluster_DEG_results_organization_20231123.csv", header = T)
+major_DEG$celltype <-substr(major_DEG$Comparisons, 1, nchar(major_DEG$Comparisons) - 11)
+major_DEG$Comparisons <- as.character(major_DEG$Comparisons)
+major_DEG$groups <- substr(major_DEG$Comparisons, nchar(major_DEG$Comparisons) - 9, nchar(major_DEG$Comparisons))
+
+major_DEG$groups <- sub("Macrophage_", "", major_DEG$groups)
+
 select_top_bottom_genes <- function(df, n = 10) {
   # List to store results
   results_list <- list()
@@ -89,10 +98,7 @@ select_top_bottom_genes <- function(df, n = 10) {
     top_genes <- head(subset_df[order(subset_df$avg_log2FC, decreasing = TRUE), ], n)
     bottom_genes <- head(subset_df[order(subset_df$avg_log2FC), ], n)
 
-   
     results_list[[comp]] <- rbind(top_genes,bottom_genes)
-    
-    
   }
   
   out <- bind_rows(results_list)
@@ -100,7 +106,7 @@ select_top_bottom_genes <- function(df, n = 10) {
   return(out) 
 }
 
-
+##create a function for the dot plot
 dot_plot_DEG <- function(celltype){
 DEG <- major_DEG[which(major_DEG$celltype %in% c(celltype)),]
 DEG <- select_top_bottom_genes(DEG, n = 5) #Apply the select_top_bottom_genes function 
@@ -116,13 +122,15 @@ GSEA_DEG["Comparisons"] <- i
 DEG_list[[i]] <- GSEA_DEG
 }
 
-##organize results
+#organize results
+  
 result_plot <- bind_rows(DEG_list)
 result_plot$padj_1_plot <- NA
 result_plot$padj_1_plot <- as.numeric(ifelse(result_plot$p_val_adj >= 0.05, "0.05", result_plot$p_val_adj))
 result_plot$Comparisons <- factor(result_plot$Comparisons, levels = c("fLFD vs fHFD","mLFD vs mHFD","fLFD vs mLFD","fHFD vs mHFD"))
 
-##plot
+#plot
+  
 ggplot(data = result_plot, aes(x = Comparisons, y = DEGs, 
                                color = avg_log2FC, size = desc(padj_1_plot))) + 
   geom_point() +
