@@ -54,13 +54,12 @@ gg1
 #### Figure 6b ####
 
 ###fHFD vs mHFD comparison ###
-cellchat <- NULL
 object.list <- list(femaleHFD = fHFDcci, 
                     maleHFD = mHFDcci)
-cellchat <- mergeCellChat(object.list, 
+fHFDvsmHFD <- mergeCellChat(object.list, 
                           add.names = names(object.list))
 
-cellchat
+fHFDvsmHFD
 # An object of class CellChat created from a merged object with multiple datasets 
 # 760 signaling genes.
 # 19363 cells.
@@ -106,8 +105,10 @@ celltype.colors = c( "AgRP"="#D97176FF",
                      "Vip/Vipr2" ="#54974AFF"
 )
 
+str(fHFDvsmHFD)
 
-netVisual_heatmap(cellchat,
+
+netVisual_heatmap(fHFDvsmHFD,
                   measure = "weight",
                   title.name = "mHFD vs fHFD",
                   color.use = celltype.colors,
@@ -120,19 +121,6 @@ netVisual_heatmap(cellchat,
 
 
 #### Figure 6e ####
-num.link <- sapply(object.list, 
-                   function(x) 
-                   {rowSums(x@net$count) + colSums(x@net$count)-diag(x@net$count)})
-
-weight.MinMax <- c(min(num.link), max(num.link)) 
-gg <- list()
-for (i in 1:length(object.list)) {
-  gg[[i]] <- netAnalysis_signalingRole_scatter(object.list[[i]], 
-                                               title = names(object.list)[i], 
-                                               weight.MinMax = weight.MinMax)
-}
-
-
 gg1 <- rankNet(cellchat, 
                mode = "comparison", 
                stacked = T, 
