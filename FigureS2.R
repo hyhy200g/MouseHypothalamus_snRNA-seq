@@ -159,7 +159,7 @@ genes <- DEG$DEGs
 comp <- names(table(DEG$groups))
 DEG_list <- list()
 for (i in comp) {
-  GSEA_DEG <- read.csv(file = paste0("/Volumes/T7_1/Project_snRNA-seq_seurat/final_DEG_SCTV2/Major/",celltype,"_",i,"_DEG_GSEA_SCT_MAST.csv"))
+  GSEA_DEG <- read.csv(file = paste0("./final_DEG_SCTV2/Major/",celltype,"_",i,"_DEG_GSEA_SCT_MAST.csv"))
   GSEA_DEG <- GSEA_DEG %>% rename(DEGs = X)
   GSEA_DEG <- GSEA_DEG[which(GSEA_DEG$DEGs %in% genes),]
   GSEA_DEG["celltype"] <- celltype
