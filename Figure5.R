@@ -31,24 +31,13 @@ FeaturePlot(Astrocyte, features = "Gfap", cols = c("lightgrey", "darkgreen")) + 
 FeaturePlot(Astrocyte, features = "Slc7a10", cols = c("lightgrey", "darkgreen")) + theme_void()
 DimPlot(Astrocyte,
         reduction = "umap",
-        cols = c("#fdcf9e",
-                 "#4e659b"),
+        cols = c("Astrocytes-2"="#4e659b",
+                 "Astrocytes-1"="#fdcf9e"),
         pt.size = 1) +
   theme_classic() +
   theme_void()
 
 # figure5B
-p <- Seurat::DimPlot(Astrocyte,
-                     reduction = "umap",
-                     pt.size = 0.5,
-                     cols = c("Astrocytes-2"="#4e659b",
-                              "Astrocytes-1"="#fdcf9e"),
-                     
-                     
-) +
-  theme_void()
-p
-
 ###### runmonocle3 ######
 #### prepare the input for monocle3 #### 
 expression_matrix <- Astrocyte@assays$RNA@counts
