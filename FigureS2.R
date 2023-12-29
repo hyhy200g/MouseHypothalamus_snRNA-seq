@@ -106,12 +106,26 @@ for (i in clusters){
   DEG(celltype = i, ident1 = "male_LFD", ident2 = "female_LFD")
 }
 
-##create a function to select the top and bottom n genes
-major_DEG <- read.csv(file = "./final_DEG_SCTV2/Major_cluster_DEG_results_organization.csv", header = T)
+
+major_DEGs <- list.files(path = "./final_DEG_SCTV2/Major/", pattern = "_DEG_SCT")
+major_DEGs <- sub("_DEG_SCT_MAST.csv","",major_DEGs)
+
+temp <- list()
+for (i in major_DEGs) {
+  temp[[i]] <- read.csv(file = paste0("./final_DEG_SCTV2/Major/",i,"_DEG_SCT_MAST_20221009.csv"))
+}
+
+temp <- Filter(function(df) nrow(df) > 0, temp) # Remove data frames with 0 rows
+
+temp1 <- bind_rows(temp, .id = "Comparisons")
+names(temp1)[names(temp1) == "X"] <- "DEGs"
+               
+major_DEG <- temp1
 major_DEG$celltype <-substr(major_DEG$Comparisons, 1, nchar(major_DEG$Comparisons) - 11)
 major_DEG$Comparisons <- as.character(major_DEG$Comparisons)
 major_DEG$groups <- substr(major_DEG$Comparisons, nchar(major_DEG$Comparisons) - 9, nchar(major_DEG$Comparisons))
 
+##create a function to select the top/bottom n DEGs               
 select_top_bottom_genes <- function(df, n = 10) {
   # List to store results
   results_list <- list()
@@ -139,7 +153,7 @@ select_top_bottom_genes <- function(df, n = 10) {
 ##create a function for the dot plot
 dot_plot_DEG <- function(celltype){
 DEG <- major_DEG[which(major_DEG$celltype %in% c(celltype)),]
-DEG <- select_top_bottom_genes(DEG, n = 5) #Apply the select_top_bottom_genes function 
+DEG <- select_top_bottom_genes(DEG, n = 5) #Apply the select_top_bottom_genes function created above
 genes <- DEG$DEGs
 comp <- names(table(DEG$groups))
 DEG_list <- list()
