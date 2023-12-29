@@ -86,7 +86,7 @@ DEG <- function(celltype, ident1, ident2){
   DE<- FindMarkers(Hypo_integrated, assay = "SCT", ident.1 = as.character(paste0(celltype,"_",ident1)), ident.2  = as.character(paste0(celltype,"_",ident2)),
                                    logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
   DE <- DE %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
-  write.csv(DE, file =paste0("./final_DEG_SCTV2/Major/",celltype,"_",ident2,"_vs_",ident1,"_DEG_SCT_MAST.csv"))
+  write.csv(DE, file =paste0("./final_DEG_SCTV2/Major/",celltype,"_",ident1,"_vs_",ident2,"_DEG_SCT_MAST.csv"))
 }
 
 ##run DEG analysis
@@ -107,7 +107,7 @@ for (i in clusters){
 }
 
 ##create a function to select the top and bottom n genes
-major_DEG <- read.csv(file = "./final_DEG_SCTV2/Major_cluster_DEG_results_organization_20231123.csv", header = T)
+major_DEG <- read.csv(file = "./final_DEG_SCTV2/Major_cluster_DEG_results_organization.csv", header = T)
 major_DEG$celltype <-substr(major_DEG$Comparisons, 1, nchar(major_DEG$Comparisons) - 11)
 major_DEG$Comparisons <- as.character(major_DEG$Comparisons)
 major_DEG$groups <- substr(major_DEG$Comparisons, nchar(major_DEG$Comparisons) - 9, nchar(major_DEG$Comparisons))
@@ -144,12 +144,12 @@ genes <- DEG$DEGs
 comp <- names(table(DEG$groups))
 DEG_list <- list()
 for (i in comp) {
-  GSEA_DEG <- read.csv(file = paste0("/Volumes/T7_1/Project_snRNA-seq_seurat/final_DEG_SCTV2/Major/",celltype,"_",i,"_DEG_GSEA_SCT_MAST_20221009.csv")) 
-GSEA_DEG <- GSEA_DEG %>% rename(DEGs = X)
-GSEA_DEG <- GSEA_DEG[which(GSEA_DEG$DEGs %in% genes),]
-GSEA_DEG["celltype"] <- celltype
-GSEA_DEG["Comparisons"] <- i
-DEG_list[[i]] <- GSEA_DEG
+  DEG1 <- read.csv(file = paste0("/Volumes/T7_1/Project_snRNA-seq_seurat/final_DEG_SCTV2/Major/",celltype,"_",i,"_DEG_SCT_MAST.csv")) 
+DEG1 <- DEG1 %>% rename(DEGs = X)
+DEG1 <- DEG1[which(DEG1$DEGs %in% genes),]
+DEG1["celltype"] <- celltype
+DEG1["Comparisons"] <- i
+DEG_list[[i]] <- DEG1
 }
 
 #organize results
@@ -157,7 +157,7 @@ DEG_list[[i]] <- GSEA_DEG
 result_plot <- bind_rows(DEG_list)
 result_plot$padj_1_plot <- NA
 result_plot$padj_1_plot <- as.numeric(ifelse(result_plot$p_val_adj >= 0.05, "0.05", result_plot$p_val_adj))
-result_plot$Comparisons <- factor(result_plot$Comparisons, levels = c("fLFD vs fHFD","mLFD vs mHFD","fLFD vs mLFD","fHFD vs mHFD"))
+result_plot$Comparisons <- factor(result_plot$Comparisons, levels = c("fHFD vs fLFD ","mHFD vs mLFD","mLFD vs fLFD","mHFD vs fHFD"))
 
 #plot
   
