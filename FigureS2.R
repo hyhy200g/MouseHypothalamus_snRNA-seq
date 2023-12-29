@@ -83,9 +83,11 @@ Hypo_integrated <- PrepSCTFindMarkers(Hypo_integrated, verbose = T) #Minimum UMI
 
 ##create a function for DEG analysis
 DEG <- function(celltype, ident1, ident2){
-  DE<- FindMarkers(Hypo_integrated, assay = "SCT", ident.1 = as.character(paste0(celltype,"_",ident1)), ident.2  = as.character(paste0(celltype,"_",ident2)),
+  DE_GSEA<- FindMarkers(Hypo_integrated, assay = "SCT", ident.1 = as.character(paste0(celltype,"_",ident1)), ident.2  = as.character(paste0(celltype,"_",ident2)),
                                    logfc.threshold = 0, min.pct = 0, min.cells.feature = 1,test.use = "MAST")
-  DE <- DE %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
+  write.csv(DE_GSEA, file =paste0("./final_DEG_SCTV2/Major/",celltype,"_",ident1,"_vs_",ident2,"_DEG_GSEA_SCT_MAST.csv"))
+  DE <- DE_GSEA %>% filter(p_val_adj<0.05) %>% arrange(avg_log2FC) 
+  DE$celltype <- celltype
   write.csv(DE, file =paste0("./final_DEG_SCTV2/Major/",celltype,"_",ident1,"_vs_",ident2,"_DEG_SCT_MAST.csv"))
 }
 
@@ -106,13 +108,13 @@ for (i in clusters){
   DEG(celltype = i, ident1 = "male_LFD", ident2 = "female_LFD")
 }
 
-
+##combine the results
 major_DEGs <- list.files(path = "./final_DEG_SCTV2/Major/", pattern = "_DEG_SCT")
 major_DEGs <- sub("_DEG_SCT_MAST.csv","",major_DEGs)
 
 temp <- list()
 for (i in major_DEGs) {
-  temp[[i]] <- read.csv(file = paste0("./final_DEG_SCTV2/Major/",i,"_DEG_SCT_MAST_20221009.csv"))
+  temp[[i]] <- read.csv(file = paste0("./final_DEG_SCTV2/Major/",i,"_DEG_SCT_MAST.csv"))
 }
 
 temp <- Filter(function(df) nrow(df) > 0, temp) # Remove data frames with 0 rows
@@ -121,9 +123,8 @@ temp1 <- bind_rows(temp, .id = "Comparisons")
 names(temp1)[names(temp1) == "X"] <- "DEGs"
                
 major_DEG <- temp1
-major_DEG$celltype <-substr(major_DEG$Comparisons, 1, nchar(major_DEG$Comparisons) - 11)
 major_DEG$Comparisons <- as.character(major_DEG$Comparisons)
-major_DEG$groups <- substr(major_DEG$Comparisons, nchar(major_DEG$Comparisons) - 9, nchar(major_DEG$Comparisons))
+major_DEG$groups <- sub("^[^_]+_(.*)$", "\\1", major_DEGs$Comparisons)
 
 ##create a function to select the top/bottom n DEGs               
 select_top_bottom_genes <- function(df, n = 10) {
@@ -158,23 +159,21 @@ genes <- DEG$DEGs
 comp <- names(table(DEG$groups))
 DEG_list <- list()
 for (i in comp) {
-  DEG1 <- read.csv(file = paste0("/Volumes/T7_1/Project_snRNA-seq_seurat/final_DEG_SCTV2/Major/",celltype,"_",i,"_DEG_SCT_MAST.csv")) 
-DEG1 <- DEG1 %>% rename(DEGs = X)
-DEG1 <- DEG1[which(DEG1$DEGs %in% genes),]
-DEG1["celltype"] <- celltype
-DEG1["Comparisons"] <- i
-DEG_list[[i]] <- DEG1
-}
+  GSEA_DEG <- read.csv(file = paste0("/Volumes/T7_1/Project_snRNA-seq_seurat/final_DEG_SCTV2/Major/",celltype,"_",i,"_DEG_GSEA_SCT_MAST.csv"))
+  GSEA_DEG <- GSEA_DEG %>% rename(DEGs = X)
+  GSEA_DEG <- GSEA_DEG[which(GSEA_DEG$DEGs %in% genes),]
+  GSEA_DEG["celltype"] <- celltype
+  GSEA_DEG["Comparisons"] <- i
+  DEG_list[[i]] <- GSEA_DEG
+  }
 
 #organize results
-  
 result_plot <- bind_rows(DEG_list)
 result_plot$padj_1_plot <- NA
 result_plot$padj_1_plot <- as.numeric(ifelse(result_plot$p_val_adj >= 0.05, "0.05", result_plot$p_val_adj))
 result_plot$Comparisons <- factor(result_plot$Comparisons, levels = c("fHFD vs fLFD ","mHFD vs mLFD","mLFD vs fLFD","mHFD vs fHFD"))
 
 #plot
-  
 ggplot(data = result_plot, aes(x = Comparisons, y = DEGs, 
                                color = avg_log2FC, size = desc(padj_1_plot))) + 
   geom_point() +
@@ -200,14 +199,14 @@ ggplot(data = result_plot, aes(x = Comparisons, y = DEGs,
 
 
 ggsave(filename = paste0(celltype,'_top5_DEG.pdf'), units = "in",device = cairo_pdf, 
-       path ="/Volumes/T7_1/Project_snRNA-seq_seurat/final_DEG_SCTV2/plots" ,width = 6, height = 8, dpi = 300)
+       path ="./plots" ,width = 6, height = 8, dpi = 300)
 
 return(result_plot) 
 }
 
 dotplot_astrocytes <- dot_plot_DEG(celltype = "Astrocytes")
 dotplot_neuron <- dot_plot_DEG(celltype = "Neuron")
-dotplot_oligo <- dot_plot_DEG(celltype = "Oligodendrocytes")
+
 
 
 # figureS2F---------------------------------
