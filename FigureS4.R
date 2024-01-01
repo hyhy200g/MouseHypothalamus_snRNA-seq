@@ -7,6 +7,8 @@ library(sctransform)
 library(harmony)
 library(dplyr)
 library(plyr)
+library(viridis)
+library(hrbrthemes)
 
 ## load all the objects
 Hypo_integrated <- readRDS("~/Yi_Huang/objects/Hypo_integrated.rds")
@@ -143,3 +145,91 @@ ggplot(POMC_subcluster_expr, aes(x=group, y=Brd1, fill=group)) +
   labs(y="Normalized UMI") +
   stat_summary(fun = "mean", geom = "point", color="black", size=3) +
   scale_fill_manual(values = c("brown", "darkgreen", "grey", "orange"))
+
+# figureS4I
+# Function to select top and bottom genes based on LFC for each comparison
+select_top_bottom_genes <- function(df, n = 10) {
+  # List to store results
+  results_list <- list()
+  
+  # Unique comparisons
+  comparisons <- unique(df$Comparisons)
+  
+  # Loop through each comparison
+  for (comp in comparisons) {
+    # Subset DataFrame for the current comparison
+    subset_df <- df[df$Comparisons == comp, ]
+    
+    # Select top and bottom genes based on LFC
+    top_genes <- head(subset_df[order(subset_df$avg_log2FC, decreasing = TRUE), ], n)
+    bottom_genes <- head(subset_df[order(subset_df$avg_log2FC), ], n)
+    
+    
+    results_list[[comp]] <- rbind(top_genes,bottom_genes)
+  }
+  
+  out <- bind_rows(results_list)
+  
+  return(out) #in total 80 genes are reported here if n=10
+}
+
+
+#Dotplot of top/bottom 5 gene 
+dot_plot_DEG <- function(celltype,n){
+  DEG <- select_top_bottom_genes(DEG, n = n) #Apply the select_top_bottom_genes function 
+  genes <- DEG$DEGs
+  comp <- names(table(DEG$Comparisons))
+  DEG_list <- list()
+  for (i in comp) {
+    GSEA_DEG <- read.csv(file = paste0("./",celltype,"_subclusters/",i,"_DEG_GSEA_SCT_MAST.csv"))
+    GSEA_DEG <- GSEA_DEG %>% rename(DEGs = X)
+    GSEA_DEG <- GSEA_DEG[which(GSEA_DEG$DEGs %in% genes),]
+    GSEA_DEG["Comparisons"] <- i
+    DEG_list[[i]] <- GSEA_DEG
+  }
+  
+  #organize results
+  result_plot <- bind_rows(DEG_list)
+  result_plot$padj_1_plot <- NA
+  result_plot$padj_1_plot <- as.numeric(ifelse(result_plot$p_val_adj >= 0.05, "0.05", result_plot$p_val_adj))
+  
+  result_plot$Comparisons <- factor(result_plot$Comparisons, levels = c("fHFD vs fLFD","mHFD vs mLFD","mLFD vs fLFD","mHFD vs fHFD"))
+  
+  #plot
+  ggplot(data = result_plot, aes(x = Comparisons, y = DEGs, 
+                                 color = avg_log2FC, size = desc(padj_1_plot))) + 
+    geom_point() +
+    theme_classic() +
+    ylab("") + 
+    xlab("") + 
+    scale_color_gradientn(
+      colours =  c("#4f8c9d","lightgrey","#a40000"),    
+      values = scales::rescale(c(-3.5, 0, 1)), 
+      limits = c(min(result_plot$avg_log2FC), 1), 
+      breaks = c(-3, 0, 1),
+      na.value = "gray80"  # Set color for NA values
+    ) +
+    theme_ipsum() +
+    theme(
+      axis.text.x = element_text(face = "bold", size = 14,angle = 45, hjust = 1),
+      axis.text.y = element_text(face = "bold.italic", size = 14)
+    ) +
+    labs(size = "Padj") +
+    scale_y_discrete(limits = rev) +
+    guides(color = guide_colorbar(barheight = unit(1.5, "cm"), barwidth = unit(0.3, "cm")))
+  
+  
+  
+  ggsave(filename = paste0(celltype,'_top',n,'_DEG.pdf'), units = "in",device = cairo_pdf, 
+         path ="./plots" ,width = 6, height = 8, dpi = 300)
+  
+  return(result_plot) 
+}
+
+
+celltypes <- c("Agrp","Pomc","AvpRorb")
+for (celltype in celltypes) {
+  DEG <- read.csv(file = paste0(celltype,"_DEG_results_organization.csv"), header = T)
+  dot_plot_DEG(celltype = celltype, n = 5)
+}
+
