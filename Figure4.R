@@ -25,6 +25,7 @@ FeaturePlot(Hypo_neuron, features = "Agrp", cols = c("lightgrey", "pink")) + the
 FeaturePlot(Hypo_neuron, features = "Npy", cols = c("lightgrey", "pink")) + theme_void()
 
 # figure4B
+DefaultAssay(AgRP_subclusters) <- "SCT"
 FeaturePlot(AgRP_subclusters, features = "Agrp", cols = c("lightgrey", "pink")) + theme_void()
 FeaturePlot(AgRP_subclusters, features = "Npy", cols = c("lightgrey", "pink")) + theme_void()
 DimPlot(AgRP_subclusters, cols = c("#D39394",
