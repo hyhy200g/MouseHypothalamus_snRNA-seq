@@ -71,6 +71,7 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
                                'Tanycytes'= "#4f8c9d"))
 
 # figureS2D---------------------------------
+source("DAseq.R")
 table(Hypo_integrated@meta.data$group,Hypo_integrated@meta.data$orig.ident)
 # m36m m39f m44m m47f m48f m50m  m6f m71m
 # female_HFD    0    0    0    0 5359    0 5080    0
