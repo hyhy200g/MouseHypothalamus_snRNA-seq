@@ -198,6 +198,7 @@ DotPlot(Hypo_neuron, features = c("Adcyap1", "Agrp", "Avp", "Bdnf", "Cartpt",
         dot.scale = 5, cluster.idents = F, group.by = "Celltype") + RotatedAxis()
 
 # figureS3D
+source("DAseq.R")
 #### fLFD vs mLFD ####
 run_DAseq_comparison(Hypo_neuron,
                      groupA = "female_LFD", 
