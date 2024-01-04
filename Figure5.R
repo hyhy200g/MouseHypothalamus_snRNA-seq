@@ -286,39 +286,110 @@ ggplot(ODC_expr, aes(x=group, y=Plp1, fill=group)) +
   stat_summary(fun = "mean", geom = "point", color="yellow", size=3) +
   scale_fill_manual(values = c("brown", "darkgreen", "grey", "orange", "blue"))
 
-# Figure5D_Cytotrace
-library(CytoTRACE)
+# figure5D monocle3 for ODC
 
-######## ODC_merged dataset ########
-####################################
-ODC_merged <- load(file = "./data/ODC_subclustering_sct_v2_clean.rdata")
-## CytoTRACE result
-mat_ODC <- as.matrix(ODC_merged@assays[["RNA"]]@counts) 
-results_ODC <- CytoTRACE(mat = mat_ODC)
-cytotrace_score <- as.data.frame(results_ODC["CytoTRACE"])
-head(cytotrace_score)
-cytotrace_score$Cell <- rownames(cytotrace_score)
-plotCytoGenes(results_ODC, numOfGenes = 10, outputDir = "./data_output")
-plotCytoTRACE(results_ODC)
-save(results_ODC,
-     file = "./data_output/ODC_subclustering_sct_v2_clean_cytotrace.rdata")
+library(monocle3)
+library(tidyverse)
+library(ComplexHeatmap)
+library(circlize)
+library(RColorBrewer)
 
-## umap result
-ODC_umap.result <- as.data.frame(ODC_merged@reductions[["umap"]]@cell.embeddings)
-ODC_umap.result$Cell <- rownames(ODC_umap.result)
-ODC_umap.result <- merge(ODC_umap.result, cytotrace_score, by = "Cell")
-ggplot(data = ODC_umap.result, mapping = aes(x = UMAP_1, y = UMAP_2, color = CytoTRACE)) +
-  geom_point(size = 0.3) +
-  labs(x = "UMAP1",
-       y = "UMAP2") +
-  scale_color_viridis_c("CytoTRACE",
-                        option = "plasma") +
-  theme_bw() +
-  theme_classic()
 
-ggsave(filename = "ODC_merged_umap.tiff",
-       height = 3,
-       width = 4)
+#### prepare the input for monocle3 ###
+expression_matrix <- ODC@assays$RNA@counts
+cell_metadata <- ODC@meta.data
+rownames(cell_metadata)
+gene_annotation <- as.data.frame(rownames(ODC@assays$RNA@counts))
+colnames(gene_annotation) <- "gene_short_name"
+rownames(gene_annotation) <- gene_annotation$gene_short_name
 
-save(ODC_umap.result,
-     file = "./data_output/ODC_cytotrace_umap.rdata")
+
+# Make the CDS object from monocle3
+cds <- new_cell_data_set(expression_matrix,
+                         cell_metadata = cell_metadata,
+                         gene_metadata = gene_annotation)
+cds <- preprocess_cds(cds,num_dim = 100,method = "PCA")
+cds <- align_cds(cds)
+plot_pc_variance_explained(cds)
+str(cds)
+
+
+
+######## dimensional reduction #####
+cds <- reduce_dimension(cds,reduction_method = "UMAP",umap.min_dist = 0.3,preprocess_method = "Aligned")
+cds <- cluster_cells(cds,reduction_method = "UMAP",k = 30,cluster_method = "louvain")
+plot_cells(cds,graph_label_size=3,cell_size=1.5,show_trajectory_graph = F)
+
+
+newcds<- cds
+
+### umap embeddings for Seurat
+umap.results <- ODC@reductions$umap@cell.embeddings
+head(umap.results)
+umap <- umap.results[,c("UMAP_1","UMAP_2")]
+umap
+umap <- as.data.frame(umap)
+umap
+
+### umap embeddings from Monocle3
+umap2 <- newcds@int_colData$reducedDims$UMAP
+umap2
+umap <- umap[match(rownames(umap2),rownames(umap)),]
+head(umap)
+newcds@int_colData$reducedDims$UMAP <- umap
+
+####################### change the clusters to seurat clusters #####################
+orig.clusters <- ODC@meta.data$Celltype
+orig.clusters
+names(orig.clusters) <- rownames(ODC@meta.data)
+orig.clusters
+newcds@clusters$UMAP$clusters <- orig.clusters
+
+### check the clustering 
+plot_cells(newcds,graph_label_size=3,cell_size=1.5,show_trajectory_graph = F)
+
+
+### check level of the partitions 
+newcds@clusters$UMAP$partitions
+plot_cells(newcds,
+           color_cells_by = "partition")
+
+
+####################### trajectory analysis #####################
+newcds <- learn_graph(newcds)
+
+plot_cells(newcds,
+           labels_per_group = F,
+           label_groups_by_cluster=T,
+           label_roots = F,
+           label_leaves=F,
+           label_branch_points=F,
+           group_label_size=4,
+           cell_size=1.5)
+
+
+###################### identify the root for pseudotime analysis  - we used cluster 1 here #####################
+get_earliest_principal_node <- function(newcds,cluster) {
+  cell_ids <- which(colData(cds)[, "Celltype"] == cluster)
+  closest_vertex <- newcds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+  closest_vertex <- as.matrix(closest_vertex[colnames(newcds), ])
+  root_pr_nodes <- igraph::V(principal_graph(newcds)[["UMAP"]])$name[as.numeric(names(which.max(table(closest_vertex[cell_ids,
+  ]))))]
+  root_pr_nodes
+}
+
+colData(cds)
+root.nodes <- get_earliest_principal_node(newcds,cluster = "ODC-1")
+newcds <- order_cells(newcds,root_pr_nodes = root.nodes)
+
+p <- plot_cells(newcds,
+                  color_cells_by = "pseudotime",
+                  show_trajectory_graph = F,
+                  label_roots = T,
+                  label_cell_groups=F,
+                  label_leaves=F,
+                  label_branch_points=F,
+                  graph_label_size=1.5,
+                  group_label_size=4,
+                  cell_size=0.5)
+p
