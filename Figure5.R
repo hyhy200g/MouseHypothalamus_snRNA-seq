@@ -27,6 +27,7 @@ POMC <- readRDS("~/Yi_Huang/objects/POMC_subclusters.rds")
 Tanycyte <- readRDS("~/Yi_Huang/objects/Tanycyte_subclusters.rds")
 
 # figure5A
+DefaultAssay(Astrocyte) <- "SCT"
 FeaturePlot(Astrocyte, features = "Gfap", cols = c("lightgrey", "darkgreen")) + theme_void()
 FeaturePlot(Astrocyte, features = "Slc7a10", cols = c("lightgrey", "darkgreen")) + theme_void()
 DimPlot(Astrocyte,
@@ -232,6 +233,7 @@ dev.off()
 
 
 # figure5C
+DefaultAssay(ODC) <- "SCT"
 FeaturePlot(ODC, features = "Pdgfra", cols = c("lightgrey", "#8B7D6B")) + theme_void()
 FeaturePlot(ODC, features = "Plp1", cols = c("lightgrey", "#8B7D6B")) + theme_void()
 
