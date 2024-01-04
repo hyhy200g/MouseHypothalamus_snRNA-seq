@@ -129,7 +129,7 @@ ggplot(data = data, aes(x = Clusters, y = GO_term,
   scale_color_viridis(option = "E",direction = -1) 
 
 #figure3E
-run_DAseq_comparison(Hypo_integrated,
+run_DAseq_comparison(Hypo_neuron,
                      groupA = "female_HFD", 
                      groupB = "male_HFD",
                      labels.1 = c("m48f","m6f"), 
