@@ -7,6 +7,7 @@ library(sctransform)
 library(harmony)
 library(dplyr)
 library(plyr)
+library(DAseq)
 
 ## load all the objects
 Hypo_integrated <- readRDS("~/Yi_Huang/objects/Hypo_integrated.rds")
@@ -70,8 +71,6 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
                                'Tanycytes'= "#4f8c9d"))
 
 # figureS2D---------------------------------
-library(DAseq)
-
 table(Hypo_integrated@meta.data$group,Hypo_integrated@meta.data$orig.ident)
 # m36m m39f m44m m47f m48f m50m  m6f m71m
 # female_HFD    0    0    0    0 5359    0 5080    0
@@ -81,7 +80,7 @@ table(Hypo_integrated@meta.data$group,Hypo_integrated@meta.data$orig.ident)
 
 
 #### fHFD vs mHFD ####
-run_DAseq_comparison(integrated,
+run_DAseq_comparison(Hypo_integrated,
                      groupA = "female_HFD", 
                      groupB = "male_HFD",
                      labels.1 = c("m48f","m6f"), 
@@ -91,7 +90,7 @@ run_DAseq_comparison(integrated,
 
 
 #### fHFD vs fLFD ####
-run_DAseq_comparison(integrated,
+run_DAseq_comparison(Hypo_integrated,
                      groupA = "female_HFD", 
                      groupB = "female_LFD",
                      labels.1 = c("m48f","m6f"), 
@@ -100,7 +99,7 @@ run_DAseq_comparison(integrated,
                      outputname = "fHFD vs fLFD integrated.pdf")
 
 #### mHFD vs mLFD ####
-run_DAseq_comparison(integrated,
+run_DAseq_comparison(Hypo_integrated,
                      groupA = "male_HFD", 
                      groupB = "male_LFD",
                      labels.1 = c("m50m","m71m"), 
@@ -110,7 +109,7 @@ run_DAseq_comparison(integrated,
 
 
 #### fLFD vs mLFD ####
-run_DAseq_comparison(integrated,
+run_DAseq_comparison(Hypo_integrated,
                      groupA = "female_LFD", 
                      groupB = "male_LFD",
                      labels.1 = c("m39f","m47f"), 
