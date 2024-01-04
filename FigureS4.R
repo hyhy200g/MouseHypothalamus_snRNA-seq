@@ -68,10 +68,12 @@ ggplot(AgRP_subcluster_expr, aes(x=subcluster, y=Npy, fill=subcluster)) +
   scale_fill_manual(values = c("pink", "grey", "#EEC591")) + coord_flip()
 
 # figureS4C
-p <- FeaturePlot(AgRP_subclusters, features = c("Agrp", "Lepr"), cols = c("lightgrey", "red", "blue"),
+DefaultAssay(AgRP_subclusters) <- "SCT"
+FeaturePlot(AgRP_subclusters, features = c("Agrp", "Lepr"), cols = c("lightgrey", "red", "blue"),
                  blend = T, blend.threshold = 0)
 
 # figureS4D
+DefaultAssay(Hypo_neuron) <- "SCT"
 FeaturePlot(Hypo_neuron, features = c("Avp", "Rorb"), cols = c("lightgrey", "blue", "red"),
             blend = T, blend.threshold = 0)
 
