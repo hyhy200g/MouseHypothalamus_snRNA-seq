@@ -20,6 +20,7 @@ Tanycyte <- readRDS("~/Yi_Huang/objects/Tanycyte_subclusters.rds")
 
 ## Figure4
 # figure4A
+DefaultAssay(Hypo_neuron) <- "SCT"
 FeaturePlot(Hypo_neuron, features = "Agrp", cols = c("lightgrey", "pink")) + theme_void()
 FeaturePlot(Hypo_neuron, features = "Npy", cols = c("lightgrey", "pink")) + theme_void()
 
@@ -124,6 +125,45 @@ DoHeatmap(AvpRorb_subclusters, features = top10$gene, group.colors = c("orange",
   scale_fill_gradientn(colors=c("#5CACEE","white","red"))
 
 # figure4G
+##featureplot
+DefaultAssay(AvpRorb_subclusters) <- "SCT"
+
+#### Avp
+p0 <- Seurat::FeaturePlot(AvpRorb_subclusters,
+                          features = "Avp",
+                          cols = c("gray","purple"),
+                          label = F,
+                          pt.size = 0.5)
+p0
+
+
+#### Rorb
+p1 <- Seurat::FeaturePlot(AvpRorb_subclusters,
+                          features = "Rorb",
+                          cols = c("gray","purple"),
+                          label = F,
+                          pt.size = 0.5)
+p1
+
+
+#### Igfbp5
+p2 <- Seurat::FeaturePlot(AvpRorb_subclusters,
+                          features = "Igfbp5",
+                          cols = c("gray","purple"),
+                          label = F,
+                          pt.size = 0.5)
+p2
+
+
+#### Gm42418
+p3 <- Seurat::FeaturePlot(AvpRorb_subclusters,
+                          features = "Gm42418",
+                          cols = c("gray","purple"),
+                          label = F,
+                          pt.size = 0.5)
+p3
+
+##violin plot
 AvpRorb_subclusters_numi <- AvpRorb_subclusters[["RNA"]]@counts
 
 normalize <- function(x){
@@ -172,3 +212,5 @@ ggplot(AvpRorb_subcluster_expr, aes(x=group, y=Gm42418, fill=group)) +
   labs(y="Normalized UMI") +
   stat_summary(fun = "mean", geom = "point", color="yellow", size=3) +
   scale_fill_manual(values = c("brown", "darkgreen", "grey", "orange"))
+
+
