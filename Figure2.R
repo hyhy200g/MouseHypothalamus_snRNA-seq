@@ -17,6 +17,7 @@ Astrocyte <- readRDS("~/Yi_Huang/objects/astrocyte_subclusters.rds")
 ODC <- readRDS("~/Yi_Huang/objects/ODC_subclusters.rds")
 POMC <- readRDS("~/Yi_Huang/objects/POMC_subclusters.rds")
 Tanycyte <- readRDS("~/Yi_Huang/objects/Tanycyte_subclusters.rds")
+
 ## Figure2
 # figure2B
 Hypo_integrated_umap <- as.data.frame(Hypo_integrated@reductions$umap@cell.embeddings)
@@ -106,6 +107,8 @@ ggdonutchart(Hypo_mLFD_freq, "Freq", fill="Var1",
   theme(axis.text.x = element_blank()) 
 
 # figure2C
+DefaultAssay(Hypo_integrated) <- "SCT"
+
 FeaturePlot(Hypo_integrated, features="Snhg11", cols = c("lightgrey", "#E89242FF"), pt.size = 0.3) + theme_void()
 FeaturePlot(Hypo_integrated, features="Rbfox3", cols = c("lightgrey", "#E89242FF"), pt.size = 0.3) + theme_void()
 FeaturePlot(Hypo_integrated, features="Ntsr2", cols = c("lightgrey", "#E89242FF"), pt.size = 0.3) + theme_void()
