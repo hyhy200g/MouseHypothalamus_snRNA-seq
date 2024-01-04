@@ -10,6 +10,7 @@ library(plyr)
 library(viridis)
 library(readxl)
 library(stringr)
+library(DAseq)
 
 ## load all the objects
 Hypo_integrated <- readRDS("~/Yi_Huang/objects/Hypo_integrated.rds")
@@ -126,3 +127,12 @@ ggplot(data = data, aes(x = Clusters, y = GO_term,
   ylab("") + 
   xlab("") + 
   scale_color_viridis(option = "E",direction = -1) 
+
+#figure3E
+run_DAseq_comparison(Hypo_integrated,
+                     groupA = "female_HFD", 
+                     groupB = "male_HFD",
+                     labels.1 = c("m48f","m6f"), 
+                     labels.2 = c("m50m","m71m"), 
+                     path = "./",
+                     outputname = "fHFD vs mHFD neuron.pdf")
