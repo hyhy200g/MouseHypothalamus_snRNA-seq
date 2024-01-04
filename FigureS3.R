@@ -177,6 +177,8 @@ ggplot(Neuron_sample, aes(group, fill=subcluster)) +
 
 
 # figureS3C
+DefaultAssay(Hypo_neuron) <- "SCT"
+
 Hypo_neuron@meta.data$Celltype <- factor(Hypo_neuron@meta.data$Celltype,
                                          levels = c("unassigned", "Pmch/Cartpt", "Hdc", "Npw", "AgRP",
                                                     "POMC", "Hcrt", "Nr5a1", "Col25a1/Six3", "Sst",
