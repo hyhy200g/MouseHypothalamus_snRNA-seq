@@ -7,6 +7,8 @@ library(sctransform)
 library(harmony)
 library(dplyr)
 library(plyr)
+library(DAseq)
+
 
 ## load all the objects
 Hypo_integrated <- readRDS("~/Yi_Huang/objects/Hypo_integrated.rds")
@@ -192,3 +194,31 @@ DotPlot(Hypo_neuron, features = c("Adcyap1", "Agrp", "Avp", "Bdnf", "Cartpt",
                                   "Prok2", "Rln1", "Sst", "Tac1", "Tac2",
                                   "Trh", "Vip"), cols = c("lightgrey", "red"),
         dot.scale = 5, cluster.idents = F, group.by = "Celltype") + RotatedAxis()
+
+# figureS3D
+#### fLFD vs mLFD ####
+run_DAseq_comparison(Hypo_neuron,
+                     groupA = "female_LFD", 
+                     groupB = "male_LFD",
+                     labels.1 = c("m39f","m47f"), 
+                     labels.2 = c("m36m","m44m"), 
+                     path = "./",
+                     outputname = "fLFD vs mLFD neuron.pdf")
+
+#### mHFD vs mLFD ####
+run_DAseq_comparison(Hypo_neuron,
+                     groupA = "male_HFD", 
+                     groupB = "male_LFD",
+                     labels.1 = c("m50m","m71m"), 
+                     labels.2 = c("m36m","m44m"), 
+                     path = "./",
+                     outputname = "mHFD vs mLFD neuron.pdf")
+
+#### fHFD vs fLFD ####
+run_DAseq_comparison(Hypo_neuron,
+                     groupA = "female_HFD", 
+                     groupB = "female_LFD",
+                     labels.1 = c("m48f","m6f"), 
+                     labels.2 = c("m39f","m47f"), 
+                     path = "./",
+                     outputname = "fHFD vs fLFD neuron.pdf")
