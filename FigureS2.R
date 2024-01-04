@@ -70,6 +70,53 @@ ggplot(Hypo_sample, aes(sample, fill=cluster)) +
                                'Tanycytes'= "#4f8c9d"))
 
 # figureS2D---------------------------------
+library(DAseq)
+
+table(Hypo_integrated@meta.data$group,Hypo_integrated@meta.data$orig.ident)
+# m36m m39f m44m m47f m48f m50m  m6f m71m
+# female_HFD    0    0    0    0 5359    0 5080    0
+# female_LFD    0 3826    0 4894    0    0    0    0
+# male_HFD      0    0    0    0    0 3587    0 5337
+# male_LFD   5383    0 5128    0    0    0    0    0
+
+
+#### fHFD vs mHFD ####
+run_DAseq_comparison(integrated,
+                     groupA = "female_HFD", 
+                     groupB = "male_HFD",
+                     labels.1 = c("m48f","m6f"), 
+                     labels.2 = c("m50m","m71m"), 
+                     path = "./",
+                     outputname = "fHFD vs mHFD integrated.pdf")
+
+
+#### fHFD vs fLFD ####
+run_DAseq_comparison(integrated,
+                     groupA = "female_HFD", 
+                     groupB = "female_LFD",
+                     labels.1 = c("m48f","m6f"), 
+                     labels.2 = c("m39f","m47f"), 
+                     path = "./",
+                     outputname = "fHFD vs fLFD integrated.pdf")
+
+#### mHFD vs mLFD ####
+run_DAseq_comparison(integrated,
+                     groupA = "male_HFD", 
+                     groupB = "male_LFD",
+                     labels.1 = c("m50m","m71m"), 
+                     labels.2 = c("m36m","m44m"), 
+                     path = "./",
+                     outputname = "mHFD vs mLFD integrated.pdf")
+
+
+#### fLFD vs mLFD ####
+run_DAseq_comparison(integrated,
+                     groupA = "female_LFD", 
+                     groupB = "male_LFD",
+                     labels.1 = c("m39f","m47f"), 
+                     labels.2 = c("m36m","m44m"), 
+                     path = "./",
+                     outputname = "fLFD vs mLFD integrated.pdf")
 
 # figureS2E---------------------------------
 #Calculate the DEGs between maternal dietary groups in major cell populations
