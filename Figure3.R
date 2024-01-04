@@ -24,6 +24,7 @@ Tanycyte <- readRDS("~/Yi_Huang/objects/Tanycyte_subclusters.rds")
 
 ## Figure3
 #figure3A
+DefaultAssay(Hypo_neuron) <- "SCT"
 FeaturePlot(Hypo_neuron, features = c("Slc32a1"), cols = c("lightgrey", "#FF4500")) + theme_void()
 FeaturePlot(Hypo_neuron, features = c("Gad1"), cols = c("lightgrey", "#FF4500")) + theme_void()
 FeaturePlot(Hypo_neuron, features = c("Gad2"), cols = c("lightgrey", "#FF4500")) + theme_void()
